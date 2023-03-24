@@ -27,3 +27,9 @@ Learning GO by building a CRUD restful API with gin. gorm and postgresql
 >
 > + [Gin Gonic](https://gin-gonic.com/docs/) is a high-perfomant web framework written in go.
 > + Same class with the likes of express
+
+
+
+# INSTRUCTIONS
+
+> 
