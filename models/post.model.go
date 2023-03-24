@@ -6,14 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type User struct {
-	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
-	Name      string    `gorm:"type:varchar(255);not null"`
-	Email     string    `gorm:"uniqueIndex;not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
 // this stuct will be transformed into the corresponding SQL table in the DB
 type Post struct {
 	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key" json:"id,omitempty"` // evoke the uuid_generate fn to gen a uuid for each record
