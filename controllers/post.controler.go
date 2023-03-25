@@ -94,3 +94,18 @@ func (pc *PostController) UpdatePost(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": updatedPost})
 }
+
+// [...] Get a single post handler
+func (pc *PostController) FindPostById(ctx *gin.Context) {
+	// Get post ID from the params
+	postId := ctx.Param("postId")
+
+	var post models.Post
+	result := pc.DB.First(&post, "id = ?", postId)
+	if result.Error != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "no post with that title exists"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": post})
+}
