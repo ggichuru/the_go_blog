@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -118,4 +119,51 @@ func (ac *AuthController) SignInUser(ctx *gin.Context) {
 	ctx.SetCookie("logged_in", "true", config.AccessTokenMaxAge*60, "/", "localhost", false, false)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": access_token})
+}
+
+// [...] refresj access token
+func (ac *AuthController) RefreshAccesToken(ctx *gin.Context) {
+	message := "could not resfresh access token"
+
+	cookie, err := ctx.Cookie("refresh_token")
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
+		return
+	}
+
+	config, _ := initializers.LoadConfig(".")
+
+	sub, err := utils.ValidateToken(cookie, config.RefreshTokenPublicKey)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	var user models.User
+
+	result := ac.DB.First(&user, "id = ?", fmt.Sprint(sub))
+	message = "user belonging to this token no longer exists"
+	if result.Error != nil {
+		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
+		return
+	}
+
+	access_token, err := utils.CreateToken(config.AccessTokenExpiresIn, user.ID, config.AccessTokenPrivateKey)
+	if err != nil {
+		ctx.JSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	ctx.SetCookie("access_token", access_token, config.AccessTokenMaxAge*60, "/", "localhost", false, true)
+	ctx.SetCookie("logged_in", "true", config.AccessTokenMaxAge*60, "/", "localhost", false, false)
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": access_token})
+}
+
+func (ac *AuthController) LogoutUser(ctx *gin.Context) {
+	ctx.SetCookie("access_token", "", -1, "/", "localhost", false, true)
+	ctx.SetCookie("refresh_token", "", -1, "/", "localhost", false, true)
+	ctx.SetCookie("logged_in", "", -1, "/", "localhost", false, false)
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
 }
