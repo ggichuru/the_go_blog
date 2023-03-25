@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -108,4 +109,26 @@ func (pc *PostController) FindPostById(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": post})
+}
+
+// [...] Get all posts handler
+func (pc *PostController) FindPosts(ctx *gin.Context) {
+	// configure for pagination
+	var page = ctx.DefaultQuery("page", "1")
+	var limit = ctx.DefaultQuery("limit", "10")
+
+	intPage, _ := strconv.Atoi(page)
+	intLimit, _ := strconv.Atoi(limit)
+	offset := (intPage - 1) * intLimit
+
+	var posts []models.Post
+
+	// get all the post and apply pagination
+	results := pc.DB.Limit(intLimit).Offset(offset).Find(&posts)
+	if results.Error != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": results.Error.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "results": len(posts), "data": posts})
 }
