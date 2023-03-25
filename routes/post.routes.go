@@ -10,7 +10,7 @@ type PostRouteController struct {
 	postController controllers.PostController
 }
 
-func NewRoutePostController(postController controllers.PostController) PostRouteController {
+func NewPostRouteController(postController controllers.PostController) PostRouteController {
 	return PostRouteController{postController}
 }
 
