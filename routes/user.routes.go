@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/ggichuru/the_go_blog/controllers"
+	"github.com/ggichuru/the_go_blog/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,4 +14,8 @@ func NewUserRouteController(userController controllers.UserController) UserRoute
 	return UserRouteController{userController}
 }
 
-func (urc *UserRouteController) UserRoute(rg *gin.RouterGroup) {}
+func (urc *UserRouteController) UserRoute(rg *gin.RouterGroup) {
+	router := rg.Group("users")
+
+	router.GET("/current_user", middleware.DeserializeUser(), urc.userController.GetCurrentUser)
+}
