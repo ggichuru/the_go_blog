@@ -132,3 +132,18 @@ func (pc *PostController) FindPosts(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "results": len(posts), "data": posts})
 }
+
+// [...] Delete a post
+func (pc *PostController) DeletePost(ctx *gin.Context) {
+	// Get id from param
+	postId := ctx.Param("postId")
+
+	// Delete post from DB
+	result := pc.DB.Delete(&models.Post{}, "id = ?", postId)
+	if result.Error != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "No post with that title"})
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, nil)
+}
